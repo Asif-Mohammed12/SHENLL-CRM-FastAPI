@@ -20,7 +20,7 @@ def generate_otp() -> str:
     return f"{random.randint(1000, 9999)}"
 
 
-@router.post("/user/login", response_model=OTPResponse)
+@router.post("/login", response_model=OTPResponse)
 async def admin_login(admin_credentials: AdminSignIn = Body(...)):
     admin_exists = await Admin.find_one(Admin.email == admin_credentials.email)
     if admin_exists:
@@ -68,7 +68,7 @@ async def admin_login(admin_credentials: AdminSignIn = Body(...)):
 
     raise HTTPException(status_code=403, detail="Incorrect email or password")
 
-@router.post("/user/verifyOtp")
+@router.post("/verifyOtp")
 async def verify_otp(otp_details: AdminOTPVerification = Body(...)):
     otp_record = await OTP.find_one(OTP.email == otp_details.email, OTP.status == "ACTIVE")
     if otp_record:
@@ -97,22 +97,22 @@ async def verify_otp(otp_details: AdminOTPVerification = Body(...)):
     # No active OTP record found
     raise HTTPException(status_code=404, detail="Active OTP record not found")
   
-@router.post("/create_admin", response_model=AdminData)
-async def admin_signup(admin: Admin = Body(...)):
-    admin_exists = await Admin.find_one(Admin.email == admin.email)
-    if admin_exists:
-        raise HTTPException(
-            status_code=409, detail="Admin with email supplied already exists"
-        )
+# @router.post("/create_admin", response_model=AdminData)
+# async def admin_signup(admin: Admin = Body(...)):
+#     admin_exists = await Admin.find_one(Admin.email == admin.email)
+#     if admin_exists:
+#         raise HTTPException(
+#             status_code=409, detail="Admin with email supplied already exists"
+#         )
 
-    admin.password = hash_helper.encrypt(admin.password)
-    new_admin = await add_admin(admin)
-    return AdminData(
-        name=new_admin.name,
-        email=new_admin.email,
-        mobileNumber=new_admin.mobileNumber,
-        role=new_admin.role,
-        status=new_admin.status,
-        createdDate=new_admin.createdDate,
-        updatedDate=new_admin.updatedDate,
-    )
+#     admin.password = hash_helper.encrypt(admin.password)
+#     new_admin = await add_admin(admin)
+#     return AdminData(
+#         name=new_admin.name,
+#         email=new_admin.email,
+#         mobileNumber=new_admin.mobileNumber,
+#         role=new_admin.role,
+#         status=new_admin.status,
+#         createdDate=new_admin.createdDate,
+#         updatedDate=new_admin.updatedDate,
+#     )

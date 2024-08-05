@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from pydantic import EmailStr
+from pydantic import BaseModel,EmailStr
+
 from datetime import datetime
 
 class AdminSignIn(BaseModel):
