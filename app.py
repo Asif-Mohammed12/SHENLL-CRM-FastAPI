@@ -6,6 +6,7 @@ from routes.admin import router as AdminRouter
 from routes.student import router as StudentRouter
 from routes.user import router as UserRouter
 from routes.staff import router as StaffRouter
+from common import router as CommonRouter
 app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -35,4 +36,4 @@ app.include_router(AdminRouter, tags=["Administrator"], prefix="/api/v1/auth/use
 app.include_router(StudentRouter,tags=["Students"],prefix="/student",dependencies=[Depends(token_listener)],)
 app.include_router(UserRouter,tags=["Users"],prefix="/users")
 app.include_router(StaffRouter,tags=["Staffs"],prefix="/api/v1/staff")
-
+app.include_router(CommonRouter,tags=["Staffs"],prefix="/api/v1")

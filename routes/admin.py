@@ -22,51 +22,59 @@ def generate_otp() -> str:
 
 @router.post("/login", response_model=OTPResponse)
 async def admin_login(admin_credentials: AdminSignIn = Body(...)):
-    admin_exists = await Admin.find_one(Admin.email == admin_credentials.email)
-    if admin_exists:
-        password_verified = hash_helper.verify(admin_credentials.password, admin_exists.password)
-        if password_verified:
-            # Check for existing active OTP
-            existing_otp = await OTP.find_one(
-                OTP.email == admin_credentials.email,
-                OTP.status == "ACTIVE"
-            )
-            if existing_otp:
-                # Set the existing OTP status to INACTIVE
-                existing_otp.status = "INACTIVE"
-                existing_otp.updatedAt = datetime.utcnow()
-                await existing_otp.save()
-
-            # Generate a new OTP
-            otp_code = generate_otp()
-            # Store the new OTP in the database
-            new_otp = OTP(
-                email=admin_credentials.email,
-                code=otp_code,
-                type="LOGIN",
-                status="ACTIVE",
-                createdAt=datetime.utcnow(),
-                updatedAt=datetime.utcnow()
-            )
-            await new_otp.insert()
-
-            # Send the OTP to the user's email (implement email sending logic here)
-
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "status": "ok",
-                    "message": "OTP sent successfully",
-                    "data": {
-                        "email": admin_credentials.email,
-                        "type": "LOGIN"
-                    }
-                }
-            )
-
+    # Find the admin by email
+    admin = await Admin.find_one(Admin.email == admin_credentials.email)
+    if not admin:
         raise HTTPException(status_code=403, detail="Incorrect email or password")
 
-    raise HTTPException(status_code=403, detail="Incorrect email or password")
+    # Verify the password
+    if not hash_helper.verify(admin_credentials.password, admin.password):
+        raise HTTPException(status_code=403, detail="Incorrect email or password")
+
+    # Deactivate any existing active OTPs
+    existing_otp = await OTP.find_one(
+        OTP.email == admin_credentials.email,
+        OTP.status == "ACTIVE"
+    )
+    if existing_otp:
+        existing_otp.status = "INACTIVE"
+        existing_otp.updatedAt = datetime.utcnow()
+        await existing_otp.save()
+
+    # Generate a new OTP
+    # otp_code = generate_otp()
+    otp_code ="1234"
+    # Store the new OTP in the database
+    new_otp = OTP(
+        email=admin_credentials.email,
+        code=otp_code,
+        type="LOGIN",
+        status="ACTIVE",
+        createdAt=datetime.utcnow(),
+        updatedAt=datetime.utcnow()
+    )
+    await new_otp.insert()
+
+    # Send the OTP to the user's email
+    # try:
+    #     send_otp_email(admin_credentials.email, otp_code)
+    # except Exception as e:
+    #     # Log the error and return an appropriate response
+    #     # logger.error(f"Failed to send OTP email: {str(e)}")
+    #     raise HTTPException(status_code=500, detail="Failed to send OTP. Please try again later.")
+
+    # Return the response
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "ok",
+            "message": "OTP sent successfully",
+            "data": {
+                "email": admin_credentials.email,
+                "type": "LOGIN"
+            }
+        }
+    )
 
 @router.post("/verifyOtp")
 async def verify_otp(otp_details: AdminOTPVerification = Body(...)):
@@ -97,22 +105,22 @@ async def verify_otp(otp_details: AdminOTPVerification = Body(...)):
     # No active OTP record found
     raise HTTPException(status_code=404, detail="Active OTP record not found")
   
-# @router.post("/create_admin", response_model=AdminData)
-# async def admin_signup(admin: Admin = Body(...)):
-#     admin_exists = await Admin.find_one(Admin.email == admin.email)
-#     if admin_exists:
-#         raise HTTPException(
-#             status_code=409, detail="Admin with email supplied already exists"
-#         )
+@router.post("/create_admin", response_model=AdminData)
+async def admin_signup(admin: Admin = Body(...)):
+    admin_exists = await Admin.find_one(Admin.email == admin.email)
+    if admin_exists:
+        raise HTTPException(
+            status_code=409, detail="Admin with email supplied already exists"
+        )
 
-#     admin.password = hash_helper.encrypt(admin.password)
-#     new_admin = await add_admin(admin)
-#     return AdminData(
-#         name=new_admin.name,
-#         email=new_admin.email,
-#         mobileNumber=new_admin.mobileNumber,
-#         role=new_admin.role,
-#         status=new_admin.status,
-#         createdDate=new_admin.createdDate,
-#         updatedDate=new_admin.updatedDate,
-#     )
+    admin.password = hash_helper.encrypt(admin.password)
+    new_admin = await add_admin(admin)
+    return AdminData(
+        name=new_admin.name,
+        email=new_admin.email,
+        mobileNumber=new_admin.mobileNumber,
+        role=new_admin.role,
+        status=new_admin.status,
+        createdDate=new_admin.createdDate,
+        updatedDate=new_admin.updatedDate,
+    )
