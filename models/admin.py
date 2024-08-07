@@ -4,25 +4,26 @@ from pydantic import BaseModel, EmailStr,Field
 from datetime import datetime
 
 class Admin(Document):
-    name: str
+    firstName: str
+    lastName:str
     email: EmailStr
-    mobileNumber: str
-    role:str
-    status:str
+    phoneNumber: str
+    role: str = "ADMIN"  # Default value for role
+    status: str = "ACTIVE"  # Default value for status
     password:str
     createdDate: datetime = Field(default_factory=datetime.utcnow)
     updatedDate: datetime = Field(default_factory=datetime.utcnow)
     class Config:
         json_schema_extra = {
             "example": {
-                "name": "Asif",
-                "email": "asif@shenll.dev",
-                "password":"Admin@123",
-                "mobileNumber":"9874563210",
-                "role":"Python Dev",
-                "status":"Active"
+                "firstName": "siva",
+                "lastName":"sankar",
+                "email": "siva@shenll.dev",
+                "phoneNumber":"8754740313",
+                "password":"password"
             }
         }
+        
 
     class Settings:
         name = "admins"

@@ -8,7 +8,7 @@ from auth.jwt_handler import sign_jwt
 from database.database import add_admin
 from models.admin import Admin
 from models.opts import OTP
-from schemas.admin import AdminData, AdminSignIn,OTPResponse, AdminOTPVerification 
+from schemas.admin import AdminData, AdminSignIn,OTPResponse, AdminOTPVerification,  ForgotPassword, ResetPassword
 
 router = APIRouter()
 
@@ -115,4 +115,108 @@ async def admin_signup(admin: Admin = Body(...)):
         status=new_admin.status,
         createdDate=new_admin.createdDate,
         updatedDate=new_admin.updatedDate,
+    )
+
+@router.post("/user/signup", response_model=AdminData)
+async def admin_signup(admin: Admin = Body(...)):
+    admin_exists = await Admin.find_one(Admin.email == admin.email)
+    if admin_exists:
+        raise HTTPException(
+            status_code=409, detail="Admin with email supplied already exists"
+        )
+
+    admin.password = hash_helper.encrypt(admin.password)
+    admin.role="ADMIN"
+    admin.status="ACTIVE"
+    await add_admin(admin)
+    otp_code = generate_otp()
+            # Store the new OTP in the database
+    new_otp = OTP(
+        email=admin.email,
+        code=otp_code,
+        type="LOGIN",
+        status="ACTIVE",
+        createdAt=datetime.utcnow(),
+        updatedAt=datetime.utcnow()
+    )
+    await new_otp.insert()
+    return JSONResponse({
+        "status": "ok",
+        "message": "Otp sent successfully",
+        "data": {
+            "email": admin.email,
+            "type": "signup"
+    }
+    })
+
+@router.post('/user/forgotPassword',response_model=ForgotPassword)
+async def forgotPassword(admin: ForgotPassword = Body(...)):
+    admin_exists = await Admin.find_one(Admin.email == admin.email)
+    if admin_exists:
+        existing_otp = await OTP.find_one(
+        OTP.email == admin.email,
+        OTP.status == "ACTIVE"
+        )
+        if existing_otp:
+        # Set the existing OTP status to INACTIVE
+            existing_otp.status = "INACTIVE"
+            existing_otp.updatedAt = datetime.utcnow()
+            await existing_otp.save()
+        
+        otp_code = generate_otp()
+        # Store the new OTP in the database
+        new_otp = OTP(
+        email=admin.email,
+        code=otp_code,
+        type="FPASSWORD",
+        status="ACTIVE",
+        createdAt=datetime.utcnow(),
+        updatedAt=datetime.utcnow()
+        )
+        await new_otp.insert()
+        
+        return JSONResponse(
+        status_code=200,
+        content={
+        "status": "ok",
+            "message": "Otp sent successfully",
+            "data": {
+            "email": "ram@gmail.com",
+        "type": "FPASSWORD"
+                    }
+        }
+        )
+    raise HTTPException(status_code=403, detail="Incorrect email or password")
+
+@router.post('/user/resetPassword',response_model=ResetPassword)
+async def reset_password(request: ResetPassword = Body(...)):
+    code = request.code
+    password = request.password
+    email = request.email
+    print("email",email)
+    admin = await Admin.find_one(Admin.email == email)
+    # print("admin_id", admin_id)
+    if not admin:
+        raise HTTPException(status_code=404, detail="User not found")
+    otp_record = await OTP.find_one(OTP.email == email, OTP.status == "ACTIVE")
+
+    if otp_record.code != code:
+        raise HTTPException(status_code=404, detail="Incorrect OTP")
+    
+    encrypted_password = hash_helper.encrypt(password)
+    
+    admin.password = encrypted_password
+    await admin.save()
+
+    jwt_token = sign_jwt(email)
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "ok",
+            "message": "User updated successfully",
+            "data": {
+                "token": jwt_token["access_token"]
+            }
+        }
     )
