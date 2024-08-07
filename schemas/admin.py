@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from pydantic import EmailStr
+from pydantic import EmailStr,Field
 from datetime import datetime
+from typing import Optional
 
 class AdminSignIn(BaseModel):
     password: str
@@ -12,22 +13,24 @@ class AdminSignIn(BaseModel):
 
 
 class AdminData(BaseModel):
-    name: str
+    firstName: str
+    lastName:str
     email: EmailStr
-    mobileNumber: str
-    role: str
-    status: str
-    createdDate: datetime
-    updatedDate: datetime
+    phoneNumber: str
+    password:str
+    role: Optional[str] = "ADMIN"  # Default value for role
+    status: Optional[str] = "ACTIVE"  # Default value for status
+    createdDate: datetime = Field(default_factory=datetime)
+    updatedDate: datetime = Field(default_factory=datetime)
     
     class Config:
         json_schema_extra = {
             "example": {
-                "name": "Asif",
-                "email": "asif@shenll.dev",
-                "mobileNumber":"9874563210",
-                "role":"Python Dev",
-                "status":"Active"
+                "firstName": "siva",
+                "lastName":"sankar",
+                "email": "siva@shenll.dev",
+                "phoneNumber":"8754740313",
+                "password":"password"
             }
         }
         
@@ -40,3 +43,13 @@ class OTPResponse(BaseModel):
 class AdminOTPVerification (BaseModel):
     email: EmailStr
     code: int
+
+
+class ForgotPassword(BaseModel):
+    email:EmailStr
+    type:str
+
+class ResetPassword(BaseModel):
+    code: str
+    password: str
+    email: EmailStr
