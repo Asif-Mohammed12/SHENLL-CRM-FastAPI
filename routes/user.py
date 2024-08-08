@@ -7,7 +7,7 @@ from schemas.user import Response
 
 router = APIRouter()
 
-@router.get("/", response_description="Students retrieved", response_model=Response)
+@router.get("/", response_description="User retrieved", response_model=Response)
 async def get_users():
     users = await retrieve_users()
     return {
