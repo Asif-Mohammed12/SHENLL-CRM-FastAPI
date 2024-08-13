@@ -5,10 +5,12 @@ from beanie import PydanticObjectId
 from models.admin import Admin
 from models.student import Student
 from models.user import User
+from models.staff import Staffs
 
 admin_collection = Admin
 student_collection = Student
 user_collection = User
+staff_collection = Staffs
 
 async def add_admin(new_admin: Admin) -> Admin:
     admin = await new_admin.create()
@@ -23,10 +25,17 @@ async def retrieve_users() -> List[User]:
     users = await user_collection.all().to_list()
     return users
 
+async def retrieve_staff() -> List[Staffs]:
+    users = await staff_collection.all().to_list()
+    return users
+
+async def add_staff(new_staff: Staffs) -> Staffs:
+    new_staff = await new_staff.create()
+    return new_staff
+
 async def add_student(new_student: Student) -> Student:
     student = await new_student.create()
     return student
-
 
 async def retrieve_student(id: PydanticObjectId) -> Student:
     student = await student_collection.get(id)
