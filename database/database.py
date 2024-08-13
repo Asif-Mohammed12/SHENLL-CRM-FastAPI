@@ -29,10 +29,13 @@ async def retrieve_staff() -> List[Staffs]:
     users = await staff_collection.all().to_list()
     return users
 
+async def add_staff(new_staff: Staffs) -> Staffs:
+    new_staff = await new_staff.create()
+    return new_staff
+
 async def add_student(new_student: Student) -> Student:
     student = await new_student.create()
     return student
-
 
 async def retrieve_student(id: PydanticObjectId) -> Student:
     student = await student_collection.get(id)
