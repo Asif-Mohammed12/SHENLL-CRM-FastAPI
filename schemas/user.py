@@ -16,3 +16,24 @@ class Response(BaseModel):
                 "data": "Sample data",
             }
         }
+
+class UpdateUserModel(BaseModel):
+    firstName: str
+    lastName: str
+    email: EmailStr
+    password: str
+    # role: str
+    # emailVerified: bool
+    # mobileVerified: bool
+    # subscribed: bool
+    # subscriptionType: bool
+    class Config:
+        arbitrary_types_allowed = True
+        json_schema_extra = {
+            "example": {
+                "firstName":"firstname",
+                "lastName":"lastname",
+                "email":"email",
+                "password":"password"
+            }
+        }

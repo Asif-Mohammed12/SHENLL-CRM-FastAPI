@@ -28,7 +28,7 @@ class Staffs(Document):
     emergencyRelationShip2: str
     createdAt: datetime
     updatedAt: datetime
-    reportTo: Optional[str] = None
+    # reportTo: Optional[str] = None
 
     class Config:
         arbitrary_types_allowed = True
