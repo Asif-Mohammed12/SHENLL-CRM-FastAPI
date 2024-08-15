@@ -10,7 +10,16 @@ from models.lead import Leads
 from models.lead_status import LeadStatus
 from models.leadsours import LeadSource
 from models.organizations import Organizations
-# from models.task import Tasks
+from models.tasks import TaskModel
+from models.jobtitles import Jobtitles
+from models.emails import Emails
+from models.departments import Departments
+from models.industries import Industries
+from models.sms import Sms
+from models.reports import Reports
+from models.roles import Roles
+from models.countries import Countries
+
 
 admin_collection = Admin
 student_collection = Student
@@ -217,13 +226,294 @@ async def retrieve_staffsq(name: Optional[str] = None, email: Optional[str] = No
 
 # -------------------tasks----------------------------------
 
-# task_collection = Tasks
+task_collection = TaskModel
 
-# async def add_task(new_task: Tasks) -> Tasks:
-#     task = await new_task.create()
-#     return task
+async def add_task(new_task: TaskModel) -> TaskModel:
+    task = await new_task.create()
+    return task
 
+async def retrieve_task(id: PydanticObjectId) -> TaskModel:
+    task = await task_collection.get(id)
+    if task:
+        return task
+    
+async def retrieve_tasks() -> list[TaskModel]:
+    task = await task_collection.all().to_list()
+    return task
 
-# async def retrieve_tasks() -> list[Tasks]:
-#     task = await task_collection.all().to_list()
-#     return task
+async def delete_task(id: PydanticObjectId) -> bool:
+    task = await task_collection.get(id)
+    if task:
+        await task.delete()
+        return True
+    
+async def update_task_data(id: PydanticObjectId, data: dict) -> Union[bool, TaskModel]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    task = await task_collection.get(id)
+    if task:
+        await task.update(update_query)
+        return task
+    return False
+
+async def retrieve_taskq(leadName: Optional[str] = None, priority: Optional[str] = None,
+                         startDate:Optional[str]= None,dueDate:Optional[str]= None,status:Optional[str]= None,
+                          description: Optional[str] = None) -> List[TaskModel]:
+    query = {}
+
+    if leadName:
+        query['leadName'] = {'$regex': leadName, '$options': 'i'}  # Case-insensitive search
+    
+    if priority:
+        query['priority'] = priority
+
+    if startDate:
+        query['startDate'] = startDate
+
+    if dueDate:
+        query['dueDate'] = dueDate
+    
+    if description:
+        query['description'] = description
+
+    if status:
+        query['status'] = status
+
+    task = await TaskModel.find(query).to_list()
+    return task
+
+# ==================department------------------------------
+
+department_collection =Departments
+
+async def add_department(new_department: Departments) -> Departments:
+    department = await new_department.create()
+    return department
+
+async def retrieve_department(id: PydanticObjectId) -> Departments:
+    department = await department_collection.get(id)
+    if department:
+        return department
+    
+async def retrieve_departments() -> list[Departments]:
+    department = await department_collection.all().to_list()
+    return department
+
+async def delete_department(id: PydanticObjectId) -> bool:
+    department = await department_collection.get(id)
+    if department:
+        await department.delete()
+        return True
+    
+async def update_department_data(id: PydanticObjectId, data: dict) -> Union[bool, Departments]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    department = await department_collection.get(id)
+    if department:
+        await department.update(update_query)
+        return department
+    return False
+
+# ------------------Jobtitles------------------------------
+
+jobtitles_collection =Jobtitles
+
+async def add_jobtitles(new_jobtitles: Jobtitles) -> Jobtitles:
+    jobtitles = await new_jobtitles.create()
+    return jobtitles
+
+async def retrieve_jobtitle(id: PydanticObjectId) -> Jobtitles:
+    jobtitles = await jobtitles_collection.get(id)
+    if jobtitles:
+        return jobtitles
+    
+async def retrieve_jobtitles() -> list[Jobtitles]:
+    job = await jobtitles_collection.all().to_list()
+    return job
+
+async def delete_jobtitles(id: PydanticObjectId) -> bool:
+    jobtitles = await jobtitles_collection.get(id)
+    if jobtitles:
+        await jobtitles.delete()
+        return True
+    
+async def update_jobtitles_data(id: PydanticObjectId, data: dict) -> Union[bool, Jobtitles]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    jobtitles = await jobtitles_collection.get(id)
+    if jobtitles:
+        await jobtitles.update(update_query)
+        return jobtitles
+    return False
+
+# -------------------industries--------------------------
+
+industries_collection =Industries
+
+async def add_industries(new_industries: Industries) -> Industries:
+    industries = await new_industries.create()
+    return industries
+
+async def retrieve_industrie(id: PydanticObjectId) -> Industries:
+    industries = await industries_collection.get(id)
+    if industries:
+        return industries
+    
+async def retrieve_industries() -> list[Industries]:
+    industries = await industries_collection.all().to_list()
+    return industries
+
+async def delete_industrie(id: PydanticObjectId) -> bool:
+    industries = await industries_collection.get(id)
+    if industries:
+        await industries.delete()
+        return True
+    
+async def update_industries_data(id: PydanticObjectId, data: dict) -> Union[bool, Industries]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    industries = await industries_collection.get(id)
+    if industries:
+        await industries.update(update_query)
+        return industries
+    return False
+
+# ---------------------emails-----------------------------
+
+email_collection =Emails
+
+async def add_email(new_email: Emails) -> Emails:
+    email = await new_email.create()
+    return email
+
+async def retrieve_email(id: PydanticObjectId) -> Emails:
+    email = await email_collection.get(id)
+    if email:
+        return email
+    
+async def retrieve_emails() -> list[Emails]:
+    email = await email_collection.all().to_list()
+    return email
+
+async def delete_email(id: PydanticObjectId) -> bool:
+    email = await email_collection.get(id)
+    if email:
+        await email.delete()
+        return True
+    
+async def update_email_data(id: PydanticObjectId, data: dict) -> Union[bool, Emails]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    email = await email_collection.get(id)
+    if email:
+        await email.update(update_query)
+        return email
+    return False
+
+# --------------------------sms------------------------------
+sms_collection =Sms
+
+async def add_sms(new_sms: Sms) -> Sms:
+    sms = await new_sms.create()
+    return sms
+
+async def retrieve_sms(id: PydanticObjectId) -> Sms:
+    sms = await sms_collection.get(id)
+    if sms:
+        return sms
+    
+async def retrieve_smses() -> list[Sms]:
+    sms = await sms_collection.all().to_list()
+    return sms
+
+async def delete_sms(id: PydanticObjectId) -> bool:
+    sms = await sms_collection.get(id)
+    if sms:
+        await sms.delete()
+        return True
+    
+async def update_sms_data(id: PydanticObjectId, data: dict) -> Union[bool, Sms]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    sms = await sms_collection.get(id)
+    if sms:
+        await sms.update(update_query)
+        return sms
+    return False
+
+# -------------------------reports------------------------------
+
+reports_collection =Reports
+
+async def add_reports(new_reports: Reports) -> Reports:
+    reports = await new_reports.create()
+    return reports
+
+async def retrieve_report(id: PydanticObjectId) -> Reports:
+    reports = await reports_collection.get(id)
+    if reports:
+        return reports
+    
+async def retrieve_reports() -> list[Reports]:
+    reports = await reports_collection.all().to_list()
+    return reports
+
+async def delete_reports(id: PydanticObjectId) -> bool:
+    reports = await reports_collection.get(id)
+    if reports:
+        await reports.delete()
+        return True
+    
+async def update_reports_data(id: PydanticObjectId, data: dict) -> Union[bool, Reports]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    reports = await reports_collection.get(id)
+    if reports:
+        await reports.update(update_query)
+        return reports
+    return False
+
+# ---------------------------roles------------------------------
+
+roles_collection =Roles
+
+async def add_role(new_role: Roles) -> Roles:
+    role = await new_role.create()
+    return role
+
+async def retrieve_role(id: PydanticObjectId) -> Roles:
+    role = await roles_collection.get(id)
+    if role:
+        return role
+    
+async def retrieve_roles() -> list[Roles]:
+    role = await roles_collection.all().to_list()
+    return role
+
+async def delete_roles(id: PydanticObjectId) -> bool:
+    role = await roles_collection.get(id)
+    if role:
+        await role.delete()
+        return True
+    
+async def update_roles_data(id: PydanticObjectId, data: dict) -> Union[bool, Roles]:
+    des_body = {k: v for k, v in data.items() if v is not None}
+    update_query = {"$set": {field: value for field, value in des_body.items()}}
+    role = await roles_collection.get(id)
+    if role:
+        await role.update(update_query)
+        return role
+    return False
+
+# -----------------Countries----------------------
+countries_collection =Countries
+
+# async def add_countries(new_countries: Countries) -> Countries:
+#     countries = await new_countries.create()
+#     return countries
+
+    
+async def retrieve_countries() -> list[Countries]:
+    countries = await countries_collection.all().to_list()
+    return countries
+

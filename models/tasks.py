@@ -1,33 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
-from typing import Optional, Any
 from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, Field
 from beanie import PydanticObjectId
+from beanie import Document
 
-
-class Response(BaseModel):
-    status_code: int
-    status: str
-    message: str
-    data: Optional[Any]
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status_code": 200,
-                "status": "ok",
-                "message": "Leadsource record(s) found",
-                "data": [
-                    {
-                        "leadStatus": "NEW",
-                        "displayIndex": "1",
-                        "status": "ACTIVE"
-                    }
-                ]
-            }
-        }
-
-
-class UpdateTasks(BaseModel):
+class TaskModel(Document):
     leadName: str
     subject: str
     relatedTo: str
@@ -59,3 +36,6 @@ class UpdateTasks(BaseModel):
                 "updatedAt": "2024-01-01T00:00:00"
             }
         }
+
+    class Settings:
+        name = "tasks"

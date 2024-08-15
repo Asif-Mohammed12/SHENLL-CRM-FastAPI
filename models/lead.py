@@ -21,7 +21,7 @@ class Leads(Document):
     jobTitle: Optional[str]
     socialMediaUrl: Optional[str]
     employee: Optional[str]
-    # website: Optional[str]
+    website: Optional[str]=None
     email: EmailStr
     alternateEmail: Optional[EmailStr]
     officePhone: Optional[str]
@@ -36,18 +36,18 @@ class Leads(Document):
     postalCode2: Optional[str]
     state2: Optional[str]
     country2: Optional[str]
-    # leadSource: Optional[PydanticObjectId]  # Assuming this is a reference ID
-    # leadStatus: Optional[PydanticObjectId]  # Assuming this is a reference ID
+    leadSource: Optional[PydanticObjectId] =None  # Assuming this is a reference ID
+    leadStatus: Optional[PydanticObjectId] =None # Assuming this is a reference ID
     leadSourceAndDescription: Optional[str]
     statusDescription: Optional[str]
     campaign: Optional[str]  # Corrected from "campaogh"
     countryCodeOffice: Optional[str]
     countryCodeMobile: Optional[str]
     opportunityAmount: Optional[str]
-    # referredBy: Optional[PydanticObjectId]  # Assuming this is a reference ID
-    # assignedBy: Optional[PydanticObjectId]  # Assuming this is a reference ID
-    # profileImage: Optional[str]
-    # organizationLogo: Optional[str]
+    referredBy: Optional[PydanticObjectId] =None# Assuming this is a reference ID
+    assignedBy: Optional[PydanticObjectId] =None # Assuming this is a reference ID
+    profileImage: Optional[str]=None
+    organizationLogo: Optional[str]=None
     status: Optional[str]  # Example: "ACTIVE", "INACTIVE", etc.
     createdAt: datetime = Field(default_factory=datetime.utcnow)
     updatedAt: datetime = Field(default_factory=datetime.utcnow)
