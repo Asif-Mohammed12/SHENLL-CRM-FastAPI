@@ -44,7 +44,11 @@ async def add_new_jobtitles(new_jobtitles: Jobtitles = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "jobtitles record(s) created",
-        "data": jobtitles,
+        "data": {
+            "_id": str(jobtitles.id),
+            "createdAt": jobtitles.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -56,7 +60,11 @@ async def update_jobtitles(id: PydanticObjectId, req: UpdateJobdetials = Body(..
         "status": "ok",
         "response_type": "success",
         "message": "jobtitles record(s) created",
-        "data": updated_jobtitles
+            "data": {
+            "_id": str(updated_jobtitles.id),
+            "createdAt": updated_jobtitles.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

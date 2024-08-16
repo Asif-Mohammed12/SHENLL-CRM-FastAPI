@@ -1,5 +1,5 @@
 from typing import List, Union
-from pydantic import EmailStr
+from fastapi import HTTPException
 from beanie import PydanticObjectId
 from typing import Optional
 from models.admin import Admin
@@ -38,10 +38,36 @@ async def add_admin(new_admin: Admin) -> Admin:
 async def retrieve_students() -> List[Student]:
     students = await student_collection.all().to_list()
     return students
-
+# List[Leads] and Page[Leads]
 async def retrieve_leads() -> List[Leads]:
     leads = await lead_collection.all().to_list()
     return leads
+
+# async def retrieve_leads(page: int = 1, limit: int = 5) -> List[Leads]:
+#     leads = await lead_collection.all().to_list().skip((page - 1) * limit).limit(limit)
+#     return list(leads)
+
+# # async def retrieve_leads(page: int = 1, limit: int = 10) -> dict:
+#     if page < 1:
+#         raise HTTPException(status_code=400, detail="Page must be greater than 0")
+#     if limit < 1:
+#         raise HTTPException(status_code=400, detail="Limit must be greater than 0")
+
+#     skip = (page - 1) * limit
+#     total_leads = await lead_collection.count_documents({})
+
+#     if skip >= total_leads:
+#         raise HTTPException(status_code=404, detail="Page not found")
+
+#     leads = await lead_collection.find().skip(skip).limit(limit).to_list()
+    
+#     return {
+#         "total_items": total_leads,
+#         "total_pages": (total_leads - 1) // limit + 1,
+#         "current_page": page,
+#         "items": leads,
+#     }
+    
 
 async def retrieve_leadstatus() -> List[LeadStatus]:
     leadstatus = await leadstatus_collection.all().to_list()

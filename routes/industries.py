@@ -44,7 +44,11 @@ async def add_new_industries(new_industries: Industries = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "industries record(s) created",
-        "data": industries,
+        "data": {
+            "_id": str(industries.id),
+            "createdAt": industries.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -56,7 +60,11 @@ async def update_industries(id: PydanticObjectId, req: UpdateIndustry = Body(...
         "status": "ok",
         "response_type": "success",
         "message": "industries record(s) created",
-        "data": updated_industries
+            "data": {
+            "_id": str(updated_industries.id),
+            "createdAt": updated_industries.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

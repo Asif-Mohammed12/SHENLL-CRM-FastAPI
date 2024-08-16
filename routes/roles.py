@@ -13,7 +13,11 @@ async def add_new_role(new_role: Roles = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "roles record(s) created",
-        "data": roles,
+        "data": {
+            "_id": str(roles.id),
+            "createdAt": roles.createdAt
+        
+        },
     }
 
 @router.get("/", response_description="roles retrieved", response_model=Response)
@@ -54,7 +58,11 @@ async def update_roles(id: PydanticObjectId, req: UpdateRoles = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "roles record(s) created",
-        "data": updated_roles
+        "data": {
+            "_id": str(updated_roles.id),
+            "createdAt": updated_roles.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

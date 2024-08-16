@@ -22,7 +22,11 @@ async def add_new_lead(new_leadstatus: LeadStatus = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "LeadStatus record(s) created",
-        "data": leadstatus,
+        "data": {
+            "_id": str(leadstatus.id),
+            "createdAt": leadstatus.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -33,7 +37,11 @@ async def update_leadstatus(id: PydanticObjectId, req: UpdateLeadStatus = Body(.
             status_code=200,
             status="ok",
             message="Leadstatus updated sucessfully",
-            data= updated_leadstatus
+            data ={
+            "_id": str(updated_leadstatus.id),
+            "createdAt": updated_leadstatus.updatedAt
+        
+        },
         )
     return Response(
             status_code=400,

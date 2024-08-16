@@ -44,7 +44,11 @@ async def add_new_sms(new_sms: Sms = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "sms record(s) created",
-        "data": sms,
+        "data": {
+            "_id": str(sms.id),
+            "createdAt": sms.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -56,7 +60,11 @@ async def update_sms(id: PydanticObjectId, req: UpdateSms = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "sms record(s) created",
-        "data": updated_sms
+            "data": {
+            "_id": str(updated_sms.id),
+            "createdAt": updated_sms.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

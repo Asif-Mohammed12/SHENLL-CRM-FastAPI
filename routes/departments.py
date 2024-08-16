@@ -41,7 +41,11 @@ async def add_new_department(new_department: Departments = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "department record(s) created",
-        "data": department,
+        "data": {
+            "_id": str(department.id),
+            "createdAt": department.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -53,7 +57,11 @@ async def update_department(id: PydanticObjectId, req: UpdateDepartment = Body(.
         "status": "ok",
         "response_type": "success",
         "message": "department record(s) created",
-        "data": updated_department
+            "data": {
+            "_id": str(updated_department.id),
+            "createdAt": updated_department.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,
@@ -71,9 +79,14 @@ async def delete_department_data(id: PydanticObjectId):
             "message": "department data retrieved successfully",
             "data": deleted_department,
         }
-    return {
-        "status_code": 404,
-        "response_type": "error",
-        "description": "Leads with id {0} doesn't exist".format(id),
-        "data": False,
-    }
+    return Response(
+            status_code=400,
+            status="Bad request",
+            message="department with id {0} doesn't exist".format(id)      
+    )
+    # return {
+    #     "status_code": 404,
+    #     "response_type": "error",
+    #     "description": "Leads with id {0} doesn't exist".format(id),
+    #     "data": False,
+    # }

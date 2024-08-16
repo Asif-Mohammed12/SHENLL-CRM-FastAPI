@@ -7,6 +7,8 @@ class LeadStatus(Document):
     leadStatus:str
     status: str = "ACTIVE"
     displayIndex:str
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    updatedAt: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
         name = "leadstatuses"

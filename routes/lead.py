@@ -1,4 +1,4 @@
-from fastapi import Body, APIRouter, HTTPException
+from fastapi import Body, APIRouter, HTTPException,Query
 from passlib.context import CryptContext
 from datetime import datetime
 from fastapi.responses import JSONResponse
@@ -19,6 +19,16 @@ async def get_leads():
         message="Leads record(s) found",
         data=leads
     )
+# async def get_leads(
+#     page: int = Query(1, ge=1, description="Page number"),
+#     limit: int = Query(10, ge=1, le=100, description="Number of items per page")
+# ):
+#     leads = await retrieve_leads(page=page, limit=limit)
+#     return Response(
+#         status="ok",
+#         message="Leads record(s) found",
+#         data=leads
+#     )
 
 @router.get("/{id}", response_description="Lead data retrieved", response_model=Response)
 async def get_lead_data(id: PydanticObjectId):
@@ -46,7 +56,11 @@ async def add_new_lead(new_lead: Leads = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "Lead record(s) created",
-        "data": lead,
+        "data": {
+            "_id": str(lead.id),
+            "createdAt": lead.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -58,7 +72,11 @@ async def update_student(id: PydanticObjectId, req: UpdateLead = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "Lead record(s) created",
-        "data": updated_lead
+            "data": {
+            "_id": str(updated_lead.id),
+            "createdAt": updated_lead.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

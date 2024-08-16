@@ -41,7 +41,10 @@ async def add_new_user(new_user: User = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "User record(s) created",
-        "data": user,
+        "data": {
+            "_id": str(user.id),
+            "createdAt": user.createdAt
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -52,7 +55,10 @@ async def update_staff(id: PydanticObjectId, req: UpdateUserModel = Body(...)):
             "status_code": 200,
             "status": "ok",
             "message": "User with ID: {} updated".format(id),
-            "data": updated_user,
+        "data": {
+            "_id": str(updated_user.id),
+            "updatedAt": updated_user.updatedAt
+        },
         }
     return {
         "status_code": 404,

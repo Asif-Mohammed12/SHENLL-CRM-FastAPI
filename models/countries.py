@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr, Field, HttpUrl
 from beanie import Document
 
 class Countries(Document):
-    cca2:str
+    cca2:Optional[str] = None
 
     class Settings:
         name = "countries"

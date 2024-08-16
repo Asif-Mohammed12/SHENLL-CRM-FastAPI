@@ -44,7 +44,11 @@ async def add_new_emails(new_emails: Emails = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "emails record(s) created",
-        "data": emails,
+        "data": {
+            "_id": str(emails.id),
+            "createdAt": emails.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -56,7 +60,11 @@ async def update_emails(id: PydanticObjectId, req: UpdateEmails = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "emails record(s) created",
-        "data": updated_emails
+            "data": {
+            "_id": str(updated_emails.id),
+            "createdAt": updated_emails.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

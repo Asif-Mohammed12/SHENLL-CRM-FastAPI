@@ -13,7 +13,11 @@ async def addOrganization(organization:Organizations = Body(...)):
         "status_code": 200,
         "response_type": "success",
         "description": "organization created successfully",
-        "data": new_organizations,
+        "data": {
+            "_id": str(new_organizations.id),
+            "createdAt": new_organizations.createdAt
+        
+        },
     }
 
 @router.get("/", response_description="organization retrieved", response_model=Response)
@@ -34,7 +38,11 @@ async def put_organization(id:PydanticObjectId,req:UpdateOrganizationModel = Bod
             "status_code": 200,
             "response_type": "success",
             "description": "organization with ID: {} updated".format(id),
-            "data": updated_organization,
+                "data": {
+            "_id": str(updated_organization.id),
+            "createdAt": updated_organization.updatedAt
+        
+        },
         }
     return {
         "status_code": 404,

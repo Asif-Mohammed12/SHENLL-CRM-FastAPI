@@ -44,7 +44,11 @@ async def add_new_reports(new_reports: Reports = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "reports record(s) created",
-        "data": reports,
+        "data": {
+            "_id": str(reports.id),
+            "createdAt": reports.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -56,7 +60,11 @@ async def update_reports(id: PydanticObjectId, req: UpdateReports = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "reports record(s) created",
-        "data": updated_reports
+            "data": {
+            "_id": str(updated_reports.id),
+            "createdAt": updated_reports.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,

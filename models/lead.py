@@ -1,19 +1,9 @@
 from datetime import datetime
 from typing import Optional, Any
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
-from bson import ObjectId
+from pydantic import EmailStr, Field, HttpUrl
 from beanie import Document,PydanticObjectId
-from pydantic import BaseModel
-# class PyObjectId(ObjectId):
-#     @classmethod
-#     def __get_validators__(cls):
-#         yield cls.validate
 
-#     @classmethod
-#     def validate(cls, v):
-#         if not isinstance(v, ObjectId):
-#             raise TypeError('Invalid ObjectId')
-#         return v
+
 class Leads(Document):
     namePrefix: Optional[str]
     firstName: str

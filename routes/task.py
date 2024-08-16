@@ -41,7 +41,11 @@ async def add_new_task(new_task: TaskModel = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "Task record(s) created",
-        "data": task,
+        "data": {
+            "_id": str(task.id),
+            "createdAt": task.createdAt
+        
+        },
     }
 
 @router.put("/{id}", response_model=Response)
@@ -53,7 +57,11 @@ async def update_task(id: PydanticObjectId, req: UpdateTasks = Body(...)):
         "status": "ok",
         "response_type": "success",
         "message": "Task record(s) created",
-        "data": updated_task
+        "data": {
+            "_id": str(updated_task.id),
+            "updatedAt": updated_task.updatedAt
+        
+        },
         }
     return Response(
             status_code=400,
