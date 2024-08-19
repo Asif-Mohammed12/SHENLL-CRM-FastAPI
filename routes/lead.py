@@ -10,9 +10,32 @@ from database.database import *
 
 router = APIRouter()
 
+# @router.get("/", response_description="Leads retrieved", response_model=Response)
+# async def get_leads():
+#     # leads = await retrieve_leads()
+#     leads = await retrieve_leads(page=1, limit=5)
+#     leads2 = await retrieve_leads(page=2, limit=5)
+    
+#     return Response(
+#         status_code=200,
+#         status="ok",
+#         message="Leads record(s) found",
+#         data=leads 
+#     )
+
+
 @router.get("/", response_description="Leads retrieved", response_model=Response)
-async def get_leads():
-    leads = await retrieve_leads()
+async def get_leads(page: int = Query(1), limit: int = Query(5),
+                    firstName: Optional[str] = Query(None, description="Filter by leads firstName"),
+                            department: Optional[str] = Query(None, description="Filter by leads department"),
+                            organization: Optional[str] = Query(None, description="Filter by leads organization"),
+                            website: Optional[str] = Query(None, description="Filter by leads website"),
+                            email: Optional[str] = Query(None, description="Filter by leads email"),
+                            mobileNumber: Optional[str] = Query(None, description="Filter by leads mobileNumber"),
+                            status: Optional[str] = Query(None, description="Filter by leads status"),):
+    leads = await retrieve_leadsq(page=page, limit=limit,firstName=firstName,department=department,
+                                  organization=organization,website=website,email=email,mobileNumber=mobileNumber,status=status)
+    
     return Response(
         status_code=200,
         status="ok",
@@ -28,7 +51,7 @@ async def get_leads():
 #         status="ok",
 #         message="Leads record(s) found",
 #         data=leads
-#     )
+    # )
 
 @router.get("/{id}", response_description="Lead data retrieved", response_model=Response)
 async def get_lead_data(id: PydanticObjectId):

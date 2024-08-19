@@ -88,6 +88,7 @@ async def delete_task_data(id: PydanticObjectId):
 
 @router.get("/", response_description="Task retrieved", response_model=Response)
 async def get_task(
+    page: int = Query(1), limit: int = Query(5),
     leadName: Optional[str] = Query(None, description="Filter by task leadName"),
     priority: Optional[str] = Query(None, description="Filter by task priority"),
     startDate: Optional[str] = Query(None, description="Filter by task startDate"),
@@ -95,7 +96,8 @@ async def get_task(
     status: Optional[str] = Query(None, description="Filter by task status"),
     description: Optional[str] = Query(None, description="Filter by task description")
 ):
-    task = await retrieve_taskq(leadName, priority, startDate, dueDate, status, description)
+    task = await retrieve_taskq(leadName=leadName, priority = priority, startDate =startDate, dueDate=dueDate, status=status,
+                                 description=description,page=page,limit=limit)
     return {
         "status_code": 200,
         "status": "ok",

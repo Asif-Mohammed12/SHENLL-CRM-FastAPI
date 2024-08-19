@@ -43,7 +43,7 @@ async def admin_login(admin_credentials: AdminSignIn = Body(...)):
 
     # Generate a new OTP
     # otp_code = generate_otp()
-    otp_code ="1234"
+    otp_code =generate_otp()
     # Store the new OTP in the database
     new_otp = OTP(
         email=admin_credentials.email,

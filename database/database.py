@@ -19,7 +19,7 @@ from models.sms import Sms
 from models.reports import Reports
 from models.roles import Roles
 from models.countries import Countries
-
+from pymongo import ASCENDING
 
 admin_collection = Admin
 student_collection = Student
@@ -39,34 +39,59 @@ async def retrieve_students() -> List[Student]:
     students = await student_collection.all().to_list()
     return students
 # List[Leads] and Page[Leads]
-async def retrieve_leads() -> List[Leads]:
-    leads = await lead_collection.all().to_list()
+# async def retrieve_leads() -> List[Leads]:
+#     leads = await lead_collection.all().to_list()
+#     return leads
+
+
+async def retrieve_leads(page: int = 1, limit: int = 5) -> List[Leads]:
+    skip = (page - 1) * limit
+    leads_cursor = lead_collection.find().sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
+    leads = await leads_cursor.to_list(length=limit)
     return leads
 
 # async def retrieve_leads(page: int = 1, limit: int = 5) -> List[Leads]:
-#     leads = await lead_collection.all().to_list().skip((page - 1) * limit).limit(limit)
-#     return list(leads)
-
-# # async def retrieve_leads(page: int = 1, limit: int = 10) -> dict:
-#     if page < 1:
-#         raise HTTPException(status_code=400, detail="Page must be greater than 0")
-#     if limit < 1:
-#         raise HTTPException(status_code=400, detail="Limit must be greater than 0")
-
 #     skip = (page - 1) * limit
-#     total_leads = await lead_collection.count_documents({})
+#     leads = await lead_collection.find().skip(skip).limit(limit).to_list(length=limit)
+#     return leads
 
-#     if skip >= total_leads:
-#         raise HTTPException(status_code=404, detail="Page not found")
+async def retrieve_leadsq(firstName: Optional[str] = None,
+                            department: Optional[str] = None,
+                            organization: Optional[str] = None,
+                            website: Optional[str] = None,
+                            email: Optional[str] = None,
+                            mobileNumber: Optional[str] = None,
+                            status: Optional[str] = None,
+                            page: int = 1,
+                            limit: int = 0 or 20) -> List[Leads]:
+    query = {}
 
-#     leads = await lead_collection.find().skip(skip).limit(limit).to_list()
+    if firstName:
+        query['name'] = {'$regex': firstName, '$options': 'i'}  # Case-insensitive search
     
-#     return {
-#         "total_items": total_leads,
-#         "total_pages": (total_leads - 1) // limit + 1,
-#         "current_page": page,
-#         "items": leads,
-#     }
+    if email:
+        query['emailId'] = email
+
+    if department:
+        query['department'] = department
+
+    if website:
+        query['website'] = website
+
+    if organization:
+        query['organization'] = organization
+    
+    if status:
+        query['status'] = status
+    
+    if mobileNumber:
+        query['mobileNumber'] = mobileNumber
+
+    skip = (page - 1) * limit
+    lead_cursor = lead_collection.find(query).sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
+    lead = await lead_cursor.to_list(length=limit)
+    
+    return lead
     
 
 async def retrieve_leadstatus() -> List[LeadStatus]:
@@ -108,6 +133,12 @@ async def delete_user(id: PydanticObjectId) -> bool:
 async def retrieve_staff() -> List[Staffs]:
     staff = await staff_collection.all().to_list()
     return staff
+
+# async def retrieve_staff(page: int = 1, limit: int = 10) -> List[Staffs]:
+#     skip = (page - 1) * limit
+#     staff_cursor = staff_collection.find().sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
+#     staff = await staff_cursor.to_list(length=limit)
+#     return staff
 
 async def add_staff(new_staff: Staffs) -> Staffs:
     new_staff = await new_staff.create()
@@ -235,7 +266,25 @@ async def delete_leads(id: PydanticObjectId) -> bool:
         await lead.delete()
         return True
 
-async def retrieve_staffsq(name: Optional[str] = None, email: Optional[str] = None, mobile_number: Optional[str] = None) -> List[Staffs]:
+# async def retrieve_staffsq(name: Optional[str] = None, email: Optional[str] = None, mobile_number: Optional[str] = None) -> List[Staffs]:
+#     query = {}
+
+#     if name:
+#         query['name'] = {'$regex': name, '$options': 'i'}  # Case-insensitive search
+    
+#     if email:
+#         query['emailId'] = email
+    
+#     if mobile_number:
+#         query['mobileNumber'] = mobile_number
+
+#     staff = await Staffs.find(query).to_list()
+#     return staff
+async def retrieve_staffsq(name: Optional[str] = None,
+                            email: Optional[str] = None,
+                            mobile_number: Optional[str] = None,
+                            page: int = 1,
+                            limit: int = 0 or 20) -> List[Staffs]:
     query = {}
 
     if name:
@@ -247,8 +296,12 @@ async def retrieve_staffsq(name: Optional[str] = None, email: Optional[str] = No
     if mobile_number:
         query['mobileNumber'] = mobile_number
 
-    staff = await Staffs.find(query).to_list()
+    skip = (page - 1) * limit
+    staff_cursor = staff_collection.find(query).sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
+    staff = await staff_cursor.to_list(length=limit)
+    
     return staff
+
 
 # -------------------tasks----------------------------------
 
@@ -282,9 +335,37 @@ async def update_task_data(id: PydanticObjectId, data: dict) -> Union[bool, Task
         return task
     return False
 
+# async def retrieve_taskq(leadName: Optional[str] = None, priority: Optional[str] = None,
+#                          startDate:Optional[str]= None,dueDate:Optional[str]= None,status:Optional[str]= None,
+#                           description: Optional[str] = None) -> List[TaskModel]:
+#     query = {}
+
+#     if leadName:
+#         query['leadName'] = {'$regex': leadName, '$options': 'i'}  # Case-insensitive search
+    
+#     if priority:
+#         query['priority'] = priority
+
+#     if startDate:
+#         query['startDate'] = startDate
+
+#     if dueDate:
+#         query['dueDate'] = dueDate
+    
+#     if description:
+#         query['description'] = description
+
+#     if status:
+#         query['status'] = status
+
+#     task = await TaskModel.find(query).to_list()
+#     return task
+
 async def retrieve_taskq(leadName: Optional[str] = None, priority: Optional[str] = None,
-                         startDate:Optional[str]= None,dueDate:Optional[str]= None,status:Optional[str]= None,
-                          description: Optional[str] = None) -> List[TaskModel]:
+                        startDate:Optional[str]= None,dueDate:Optional[str]= None,status:Optional[str]= None,
+                        description: Optional[str] = None,
+                        page: int = 1,
+                        limit: int = 0 or 10) -> List[TaskModel]:
     query = {}
 
     if leadName:
@@ -305,7 +386,9 @@ async def retrieve_taskq(leadName: Optional[str] = None, priority: Optional[str]
     if status:
         query['status'] = status
 
-    task = await TaskModel.find(query).to_list()
+    skip = (page - 1) * limit
+    task_cursor = task_collection.find(query).sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
+    task = await task_cursor.to_list(length=limit)
     return task
 
 # ==================department------------------------------
