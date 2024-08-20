@@ -3,7 +3,8 @@ from typing import Optional, List
 from database.database import *
 from pydantic import EmailStr
 from schemas.staff import Response, UpdateStaffModel
-# from schemas.
+from fastapi.responses import FileResponse
+
 router = APIRouter()
 
 # @router.get("/", response_description="Staff retrieved", response_model=Response)
@@ -21,6 +22,9 @@ router = APIRouter()
 async def get_staff_data(id: PydanticObjectId):
     staff = await retrieve_staffs(id)
     if staff:
+        # Add the image URL to the response data if the profileImage is present
+        if staff.profileImage:
+            staff.profileImage = f"/staff_images/{os.path.basename(staff.profileImage)}"
         return {
             "status_code": 200,
             "status": "ok",
@@ -30,12 +34,29 @@ async def get_staff_data(id: PydanticObjectId):
     return {
         "status_code": 404,
         "response_type": "error",
-        "description": "staff doesn't exist",
+        "description": "Staff doesn't exist",
     }
+# async def get_staff_data(id: PydanticObjectId):
+#     staff = await retrieve_staffs(id)
+#     if staff:
+#         return {
+#             "status_code": 200,
+#             "status": "ok",
+#             "message": "Staff data retrieved successfully",
+#             "data": staff,
+#         }
+#     return {
+#         "status_code": 404,
+#         "response_type": "error",
+#         "description": "staff doesn't exist",
+#     }
 
 @router.post("/", response_description="Staff created", response_model=Response)
-async def add_new_staff(new_staff: Staffs = Body(...)):
-    staff = await add_staff(new_staff)
+async def add_new_staff(
+    new_staff: Staffs = Body(...),
+    profile_image: UploadFile = File(None)  # Optional image upload
+):
+    staff = await add_staff(new_staff, profile_image)
     return {
         "status_code": 200,
         "status": "ok",
@@ -44,9 +65,21 @@ async def add_new_staff(new_staff: Staffs = Body(...)):
         "data": {
             "_id": str(staff.id),
             "createdAt": staff.createdAt
-        
         },
     }
+# async def add_new_staff(new_staff: Staffs = Body(...)):
+#     staff = await add_staff(new_staff)
+#     return {
+#         "status_code": 200,
+#         "status": "ok",
+#         "response_type": "success",
+#         "message": "Staff record(s) created",
+#         "data": {
+#             "_id": str(staff.id),
+#             "createdAt": staff.createdAt
+        
+#         },
+#     }
 
 @router.put("/{id}", response_model=Response)
 async def update_staff(id: PydanticObjectId, req: UpdateStaffModel = Body(...)):
@@ -87,12 +120,12 @@ async def delete_staff_data(id: PydanticObjectId):
     }
 
 @router.get("/", response_description="Staff retrieved", response_model=Response)
-async def get_staff(
+async def get_staff( page: int = Query(1), limit: int = Query(10),
     name: Optional[str] = Query(None, description="Filter by staff name"),
     email: Optional[EmailStr] = Query(None, description="Filter by staff email"),
     mobile_number: Optional[str] = Query(None, description="Filter by staff mobile number")
 ):
-    staff = await retrieve_staffsq(name, email, mobile_number)
+    staff = await retrieve_staffsq(page=page,limit=limit,name=name, email=email, mobile_number=mobile_number)
     return {
         "status_code": 200,
         "status": "ok",

@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,Field
 from typing import Optional, Any
-import datetime
+from datetime import datetime
+from beanie import Document,PydanticObjectId
 
 class Response(BaseModel):
     status_code: int
@@ -25,23 +26,22 @@ class UpdateStaffModel(BaseModel):
     roleName: str
     mobileNumber: str
     alternateNumber: str
-    dateOfJoining: str
+    dateOfJoining: datetime = Field(default_factory=datetime.utcnow)
     status: str
     roleName: str
     currentAddress: str
     permanentAddress: str
     ug: str
     profileImage: Optional[str] = None 
-    selectStatus: str
+    selectStatus: Optional[str] = None 
     emergencyContactName1: str
     emergencyMobileNumber1: str
     emergencyRelationShip1: str
     emergencyContactName2: str
     emergencyMobileNumber2: str
     emergencyRelationShip2: str
-    createdAt: datetime
-    updatedAt: datetime
-    # reportTo: Optional[str] = None
+    updatedAt:datetime = Field(default_factory=datetime.utcnow)
+    reportTo: Optional[PydanticObjectId] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -66,8 +66,7 @@ class UpdateStaffModel(BaseModel):
                 "emergencyRelationShip1": "Spouse",
                 "emergencyContactName2": "Joe Doe",
                 "emergencyMobileNumber2": "0987654321",
-                "emergencyRelationShip2": "Brother",
-                "createdAt": "2023-01-01T00:00:00",
+                "emergencyRelationShip2": "Brothe",
                 "updatedAt": "2023-01-02T00:00:00",
                 "reportTo": "60d5ec49f9b1b143c4a0b3a3"
             }

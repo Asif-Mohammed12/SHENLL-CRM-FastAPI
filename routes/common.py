@@ -6,7 +6,7 @@ import os
 router = APIRouter()
 
 # Define the directory to save the uploaded files
-UPLOAD_DIRECTORY = r"C:\Users\shnla\OneDrive\Desktop\CRM FASTAPI\fastapi-mongo\uploads"
+UPLOAD_DIRECTORY = r"C:\Users\Admin\Desktop\SHENLL-CRM-FastAPI\uploads\staff_images"
 
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)

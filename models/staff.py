@@ -1,8 +1,7 @@
 from typing import List, Optional
-from beanie import Document
-from pydantic import  EmailStr
+from beanie import Document,PydanticObjectId
+from pydantic import  EmailStr,Field
 from datetime import datetime
-from bson import ObjectId
 
 class Staffs(Document):
     name: str
@@ -12,23 +11,23 @@ class Staffs(Document):
     roleName: str
     mobileNumber: str
     alternateNumber: str
-    dateOfJoining: str
+    dateOfJoining: datetime = Field(default_factory=datetime.utcnow)
     status: str
     roleName: str
     currentAddress: str
     permanentAddress: str
     ug: str
     profileImage: Optional[str] = None 
-    selectStatus: str
+    selectStatus: Optional[str] = None 
     emergencyContactName1: str
     emergencyMobileNumber1: str
     emergencyRelationShip1: str
     emergencyContactName2: str
     emergencyMobileNumber2: str
     emergencyRelationShip2: str
-    createdAt: datetime
-    updatedAt: datetime
-    # reportTo: Optional[str] = None
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    updatedAt: datetime = Field(default_factory=datetime.utcnow)
+    reportTo: Optional[PydanticObjectId] = None
 
     class Config:
         arbitrary_types_allowed = True

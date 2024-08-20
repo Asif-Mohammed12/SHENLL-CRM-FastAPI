@@ -1,5 +1,6 @@
 from typing import List, Union
-from fastapi import HTTPException
+from fastapi import APIRouter, Body, File, UploadFile, HTTPException
+from routes.common import UPLOAD_DIRECTORY
 from beanie import PydanticObjectId
 from typing import Optional
 from models.admin import Admin
@@ -19,8 +20,9 @@ from models.sms import Sms
 from models.reports import Reports
 from models.roles import Roles
 from models.countries import Countries
-from pymongo import ASCENDING
-
+# from pymongo import ASCENDING
+import os
+import shutil
 admin_collection = Admin
 student_collection = Student
 user_collection = User
@@ -29,6 +31,7 @@ lead_collection = Leads
 leadstatus_collection = LeadStatus
 leadsource_collection = LeadSource
 organization_collection =Organizations
+
 
 async def add_admin(new_admin: Admin) -> Admin:
     admin = await new_admin.create()
@@ -134,15 +137,73 @@ async def retrieve_staff() -> List[Staffs]:
     staff = await staff_collection.all().to_list()
     return staff
 
-# async def retrieve_staff(page: int = 1, limit: int = 10) -> List[Staffs]:
-#     skip = (page - 1) * limit
-#     staff_cursor = staff_collection.find().sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
-#     staff = await staff_cursor.to_list(length=limit)
-#     return staff
+# async def add_staff(new_staff: Staffs) -> Staffs:
+#     new_staff = await new_staff.create()
+#      return new_staff
+# async def add_staff(new_staff: Staffs) -> Staffs:
+#     created_staff = await new_staff.create()
+#     pipeline = [
+#         {
+#             "$lookup": {
+#                 "from": "reports",  # Collection name as a string
+#                 "localField": "reportTo",  # Field in the Staffs collection
+#                 "foreignField": "_id",  # Field in the Leads collection
+#                 "as": "report"
+#             }
+#         },
+#         {
+#             "$unwind": "$reports"  # Unwind if `lead` is an array
+#         },
+#         {
+#             "$project": {
+#                 "_id": 1,
+#                 "reports_info": "$reports.info"  # Adjust as needed based on your document structure
+#             }
+#         }
+#     ]
+#     return created_staff
+async def add_staff(new_staff: Staffs, profile_image: Optional[UploadFile] = None) -> Staffs:
+    # Handle image upload if provided
+    if profile_image:
+        # Save the uploaded image to the specified directory
+        image_path = os.path.join(UPLOAD_DIRECTORY, profile_image.filename)
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(profile_image.file, buffer)
+        # Store the image path in the staff's profileImage field
+        new_staff.profileImage = image_path
 
-async def add_staff(new_staff: Staffs) -> Staffs:
-    new_staff = await new_staff.create()
-    return new_staff
+    # Create the new staff member in the database
+    created_staff = await new_staff.create()
+
+    # Aggregation pipeline to look up and project fields
+    pipeline = [
+        {
+            "$lookup": {
+                "from": "reports",  # Collection name as a string
+                "localField": "reportTo",  # Field in the Staffs collection
+                "foreignField": "_id",  # Field in the Reports collection
+                "as": "reports"
+            }
+        },
+        {
+            "$unwind": "$reports"  # Unwind if `reports` is an array
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "reports_info": "$reports.info"  # Adjust as needed based on your document structure
+            }
+        }
+    ]
+
+    # Execute the aggregation on the staff collection
+    staff_collection = Staffs.get_motor_collection()
+    aggregation_result = staff_collection.aggregate(pipeline)
+    
+    async for result in aggregation_result:
+        print(result)  # Handle the aggregation results as needed
+    
+    return created_staff
 
 async def update_staff_data(id: PydanticObjectId, data: dict) -> Union[bool, Staffs]:
     des_body = {k: v for k, v in data.items() if v is not None}
@@ -280,11 +341,35 @@ async def delete_leads(id: PydanticObjectId) -> bool:
 
 #     staff = await Staffs.find(query).to_list()
 #     return staff
+# async def retrieve_staffsq(name: Optional[str] = None,
+#                             email: Optional[str] = None,
+#                             mobile_number: Optional[str] = None,
+#                             page: int = 0,
+#                             limit: int = 0 or 20) -> List[Staffs]:
+#     query = {}
+
+#     if name:
+#         query['name'] = {'$regex': name, '$options': 'i'}  # Case-insensitive search
+    
+#     if email:
+#         query['emailId'] = email
+    
+#     if mobile_number:
+#         query['mobileNumber'] = mobile_number
+
+#     page = max(1, page)
+#     limit = max(1, limit)
+
+#     skip = (page - 1) * limit if page > 0 else 0
+#     staff_cursor = staff_collection.find(query).sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
+#     staff = await staff_cursor.to_list(length=limit)
+    
+#     return staff
 async def retrieve_staffsq(name: Optional[str] = None,
-                            email: Optional[str] = None,
-                            mobile_number: Optional[str] = None,
-                            page: int = 1,
-                            limit: int = 0 or 20) -> List[Staffs]:
+                           email: Optional[str] = None,
+                           mobile_number: Optional[str] = None,
+                           page: int = 0,
+                           limit: int = 0 or 20) -> List[dict]:  # Returning list of dictionaries
     query = {}
 
     if name:
@@ -296,11 +381,23 @@ async def retrieve_staffsq(name: Optional[str] = None,
     if mobile_number:
         query['mobileNumber'] = mobile_number
 
-    skip = (page - 1) * limit
+    page = max(1, page)
+    limit = max(1, limit)
+
+    skip = (page - 1) * limit if page > 0 else 0
     staff_cursor = staff_collection.find(query).sort([("createdAt", 1), ("_id", 1)]).skip(skip).limit(limit)
-    staff = await staff_cursor.to_list(length=limit)
-    
-    return staff
+    staff_list = await staff_cursor.to_list(length=limit)
+
+    # Process staff data to include image URLs
+    for staff in staff_list:
+        if 'profileImage' in staff and staff['profileImage']:
+            image_path = staff['profileImage']
+            # Convert file path to URL (you may need to adjust this based on your server setup)
+            staff['profileImageUrl'] = f"/staff-images/{os.path.basename(image_path)}"
+
+    return staff_list
+
+
 
 
 # -------------------tasks----------------------------------

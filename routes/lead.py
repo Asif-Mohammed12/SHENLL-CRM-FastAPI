@@ -57,12 +57,12 @@ async def get_leads(page: int = Query(1), limit: int = Query(5),
 async def get_lead_data(id: PydanticObjectId):
     leads = await retrieve_lead(id)
     if leads:
-        return {
-            "status_code": 200,
-            "response_type": "success",
-            "description": "Leads data retrieved successfully",
-            "data": leads,
-        }
+        return Response(
+        status_code=200,
+        status="ok",
+        message="Leads record(s) found",
+        data=leads
+        )
     return {
         "status_code": 404,
         "response_type": "error",
