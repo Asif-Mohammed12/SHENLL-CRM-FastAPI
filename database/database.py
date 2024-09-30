@@ -163,19 +163,12 @@ async def retrieve_staff() -> List[Staffs]:
 #     ]
 #     return created_staff
 async def add_staff(new_staff: Staffs, profile_image: Optional[UploadFile] = None) -> Staffs:
-    # Handle image upload if provided
     if profile_image:
-        # Save the uploaded image to the specified directory
         image_path = os.path.join(UPLOAD_DIRECTORY, profile_image.filename)
-        with open(image_path, "wb") as buffer:
+        with open(image_path, "staff_images") as buffer:
             shutil.copyfileobj(profile_image.file, buffer)
-        # Store the image path in the staff's profileImage field
         new_staff.profileImage = image_path
-
-    # Create the new staff member in the database
     created_staff = await new_staff.create()
-
-    # Aggregation pipeline to look up and project fields
     pipeline = [
         {
             "$lookup": {
@@ -393,7 +386,7 @@ async def retrieve_staffsq(name: Optional[str] = None,
         if 'profileImage' in staff and staff['profileImage']:
             image_path = staff['profileImage']
             # Convert file path to URL (you may need to adjust this based on your server setup)
-            staff['profileImageUrl'] = f"/staff-images/{os.path.basename(image_path)}"
+            staff['profileImageUrl'] = f"/C:/Users/Admin/Desktop/SHENLL-CRM-FastAPI/uploads/staff_images/{os.path.basename(image_path)}"
 
     return staff_list
 

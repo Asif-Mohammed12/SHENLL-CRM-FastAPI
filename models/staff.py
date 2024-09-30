@@ -17,7 +17,7 @@ class Staffs(Document):
     currentAddress: str
     permanentAddress: str
     ug: str
-    profileImage: Optional[str] = None 
+    profileImage: Optional[bytes] = None 
     selectStatus: Optional[str] = None 
     emergencyContactName1: str
     emergencyMobileNumber1: str
